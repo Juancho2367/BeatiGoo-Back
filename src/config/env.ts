@@ -1,7 +1,7 @@
 import { Type } from '@sinclair/typebox';
 
 export const envSchema = Type.Object({
-  PORT: Type.Number({ default: 3000 }),
+  PORT: Type.Number({ default: 3001 }),
   HOST: Type.String({ default: '0.0.0.0' }),
   NODE_ENV: Type.String({ default: 'development' }),
   MONGODB_URI: Type.String({ default: 'mongodb+srv://anonymous1279r:qJ5CxnxnKJi6ehbg@beautigo.sj0jhti.mongodb.net/?retryWrites=true&w=majority&appName=BeautiGo' }),
@@ -11,7 +11,7 @@ export const envSchema = Type.Object({
 });
 
 export const config = {
-  PORT: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+  PORT: process.env.PORT ? parseInt(process.env.PORT) : 3001,
   HOST: process.env.HOST || '0.0.0.0',
   NODE_ENV: process.env.NODE_ENV || 'development',
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://anonymous1279r:qJ5CxnxnKJi6ehbg@beautigo.sj0jhti.mongodb.net/?retryWrites=true&w=majority&appName=BeautiGo',

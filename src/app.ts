@@ -46,7 +46,7 @@ export async function buildApp() {
         description: 'API documentation for BeautiGo',
         version: '1.0.0'
       },
-      host: 'localhost:3000',
+      host: 'localhost:3001',
       schemes: ['http', 'https'],
       consumes: ['application/json'],
       produces: ['application/json'],
