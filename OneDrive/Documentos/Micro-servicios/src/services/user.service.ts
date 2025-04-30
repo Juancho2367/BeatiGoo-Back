@@ -3,14 +3,11 @@ import mongoose from 'mongoose';
 import { FastifyInstance } from 'fastify';
 import {
   User,
-  UserStatus
+  UserStatus,
+  RegisterData,
+  UserLogin
 } from '../schemas/user.schema';
 import crypto from 'crypto';
-
-interface UserLogin {
-  email: string;
-  password: string;
-}
 
 export class UserError extends Error implements FastifyError {
   public statusCode: number;
@@ -32,12 +29,12 @@ const userSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['active', 'inactive', 'pending'],
-    default: 'pending'
+    default: 'active'
   },
   role: {
     type: String,
-    enum: ['user', 'business_owner', 'admin'],
-    default: 'user'
+    enum: ['admin', 'professional', 'client'],
+    default: 'client'
   },
   preferences: {
     notifications: { type: Boolean, default: true },
@@ -66,9 +63,73 @@ export class UserService {
       .digest('hex');
   }
 
+  async register(userData: RegisterData): Promise<User> {
+    try {
+      // Check if user with this email already exists
+      const existingUser = await this.findUserByEmail(userData.email);
+      if (existingUser) {
+        throw new UserError('User with this email already exists', 409);
+      }
+
+      // Hash the password before storing
+      const hashedPassword = this.hashPassword(userData.password);
+      
+      // Create the user with default preferences and active status
+      const userToCreate = {
+        ...userData,
+        password: hashedPassword,
+        status: 'active',
+        preferences: {
+          notifications: true,
+          language: 'en'
+        }
+      };
+      
+      const user = new this.User(userToCreate);
+      return await user.save();
+    } catch (error: unknown) {
+      if (error instanceof UserError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new UserError(`Failed to register user: ${message}`);
+    }
+  }
+
+  async login({ email, password }: UserLogin): Promise<User | null> {
+    try {
+      const hashedPassword = this.hashPassword(password);
+      const user = await this.User.findOne({
+        email,
+        password: hashedPassword,
+        status: 'active'
+      });
+      
+      if (!user) {
+        throw new UserError('Invalid credentials', 401);
+      }
+      
+      return user;
+    } catch (error: unknown) {
+      if (error instanceof UserError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new UserError(`Login failed: ${message}`);
+    }
+  }
+
   async createUser(userData: Omit<User, '_id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     try {
-      const user = new this.User(userData);
+      // Hash the password before storing
+      const hashedPassword = this.hashPassword(userData.password);
+      
+      const userToCreate = {
+        ...userData,
+        password: hashedPassword
+      };
+      
+      const user = new this.User(userToCreate);
       return await user.save();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -86,7 +147,7 @@ export class UserService {
 
   async findUserById(id: string): Promise<User> {
     try {
-      const user = await this.User.findById(id);
+      const user = await this.User.findById(id).select('-password');
       if (!user) {
         throw new UserError(`User not found: ${id}`, 404);
       }
@@ -103,13 +164,18 @@ export class UserService {
 
   async updateUser(id: string, userData: Partial<User>): Promise<User> {
     try {
-      const user = await this.findUserById(id);
+      await this.findUserById(id);
+      
+      // If password is being updated, hash it
+      if (userData.password) {
+        userData.password = this.hashPassword(userData.password);
+      }
       
       const updatedUser = await this.User.findByIdAndUpdate(
         id,
         userData,
         { new: true }
-      );
+      ).select('-password');
 
       if (!updatedUser) {
         throw new UserError(`Failed to update user: ${id}`);
@@ -127,7 +193,9 @@ export class UserService {
       const user = await this.findUserById(id);
       
       if (user.status === 'active') {
-        throw new UserError('Cannot delete an active user');
+        // Instead of hard deleting, update the status to inactive
+        await this.User.findByIdAndUpdate(id, { status: 'inactive' });
+        return true;
       }
 
       const result = await this.User.deleteOne({ _id: id });

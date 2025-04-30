@@ -15,6 +15,11 @@ import paymentPlugin from './plugins/payment';
 import geoPlugin from './plugins/geo';
 import notificationPlugin from './plugins/notification';
 
+// Import API routes
+import userRoutes from './routes/v1/users';
+import authRoutes from './routes/v1/auth';
+import geoRoutes from './routes/v1/geolocation';
+
 export async function buildApp() {
   const app = fastify({
     logger: {
@@ -72,6 +77,20 @@ export async function buildApp() {
   await app.register(paymentPlugin);
   await app.register(geoPlugin);
   await app.register(notificationPlugin);
+
+  // Register API routes v1
+  app.register((fastify, options, done) => {
+    // Auth routes
+    fastify.register(authRoutes, { prefix: '/auth' });
+    
+    // User routes
+    fastify.register(userRoutes, { prefix: '/users' });
+    
+    // Geo routes
+    fastify.register(geoRoutes, { prefix: '/geo' });
+    
+    done();
+  }, { prefix: '/api/v1' });
 
   return app;
 }

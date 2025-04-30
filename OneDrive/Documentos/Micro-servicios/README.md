@@ -85,6 +85,171 @@ http://localhost:3000/documentation
 - `PUT /api/v1/users/me` - Update user profile (authenticated)
 - `DELETE /api/v1/users/me` - Delete user (authenticated)
 
+## Authentication API Endpoints
+
+The backend provides the following authentication endpoints that can be consumed by the frontend:
+
+### Base URL
+
+All API endpoints are prefixed with `/api/v1`.
+
+### Authentication Endpoints
+
+#### Register a New User
+
+- **URL**: `/auth/register`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "password": "securePassword",
+    "phone": "+123456789",
+    "role": "client" // Or "professional" or "admin"
+  }
+  ```
+- **Response**: Status Code 201
+  ```json
+  {
+    "user": {
+      "_id": "user_id",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "phone": "+123456789",
+      "role": "client",
+      "status": "active",
+      "preferences": {
+        "notifications": true,
+        "language": "en"
+      }
+    },
+    "token": "jwt_token"
+  }
+  ```
+
+#### Login User
+
+- **URL**: `/auth/login`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "email": "john@example.com",
+    "password": "securePassword"
+  }
+  ```
+- **Response**: Status Code 200
+  ```json
+  {
+    "user": {
+      "_id": "user_id",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "phone": "+123456789",
+      "role": "client",
+      "status": "active",
+      "preferences": {
+        "notifications": true,
+        "language": "en"
+      }
+    },
+    "token": "jwt_token"
+  }
+  ```
+
+#### Get Current User
+
+- **URL**: `/auth/me`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer jwt_token`
+- **Response**: Status Code 200
+  ```json
+  {
+    "user": {
+      "_id": "user_id",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "phone": "+123456789",
+      "role": "client",
+      "status": "active",
+      "preferences": {
+        "notifications": true,
+        "language": "en"
+      }
+    },
+    "token": "jwt_token"
+  }
+  ```
+
+#### Logout
+
+- **URL**: `/auth/logout`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer jwt_token`
+- **Response**: Status Code 200
+  ```json
+  {
+    "success": true,
+    "message": "Logout successful"
+  }
+  ```
+
+### User Endpoints
+
+#### Update User Profile
+
+- **URL**: `/users/me`
+- **Method**: `PUT`
+- **Headers**: `Authorization: Bearer jwt_token`
+- **Request Body**:
+  ```json
+  {
+    "firstName": "Johnny",
+    "lastName": "Doe",
+    "phone": "+987654321"
+  }
+  ```
+- **Response**: Status Code 200
+  ```json
+  {
+    "_id": "user_id",
+    "firstName": "Johnny",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "phone": "+987654321",
+    "role": "client",
+    "status": "active",
+    "preferences": {
+      "notifications": true,
+      "language": "en"
+    }
+  }
+  ```
+
+#### Delete User Account
+
+- **URL**: `/users/me`
+- **Method**: `DELETE`
+- **Headers**: `Authorization: Bearer jwt_token`
+- **Response**: Status Code 204 (No Content)
+
+## Frontend Integration
+
+The authentication API is designed to work seamlessly with the frontend's authentication store. The response format of `/auth/login` and `/auth/register` includes both the user object and the JWT token, which matches the expected structure in the frontend.
+
+### Authentication Flow
+
+1. User registers or logs in through the frontend
+2. Backend validates credentials and returns user data + JWT token
+3. Frontend stores the token in localStorage
+4. Frontend includes the token in Authorization header for authenticated requests
+5. Backend verifies the token and provides access to protected resources
+
 ## Project Structure
 
 ```
