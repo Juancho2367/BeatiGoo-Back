@@ -1,0 +1,39 @@
+{
+  "name": "fastify-microservices",
+  "version": "1.0.0",
+  "description": "Microservices architecture with Fastify",
+  "main": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "tap"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.4.1",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/jwt": "^7.2.4",
+    "@fastify/mongodb": "^8.0.0",
+    "@fastify/rate-limit": "^8.0.3",
+    "@fastify/swagger": "^8.12.1",
+    "@fastify/swagger-ui": "^1.10.1",
+    "@fastify/type-provider-typebox": "^3.5.0",
+    "@sinclair/typebox": "^0.31.28",
+    "axios": "^1.6.2",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.24.3",
+    "fastify-plugin": "^4.5.1",
+    "mongoose": "^8.0.3",
+    "pino": "^8.16.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.17.32",
+    "pino-pretty": "^10.2.3",
+    "tap": "^16.3.7",
+    "tsx": "^4.7.0",
+    "typescript": "^5.8.3"
+  }
+}
